@@ -69,7 +69,3 @@
         if (player) player.pause();
     }
 </script>
-
-<div bind:this={containerElement}></div>
-
-<button on:click={togglePlay}>Toggle Play/Pause</button>
