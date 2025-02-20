@@ -139,8 +139,13 @@
 <style>
     .tab-content {
         padding-bottom: 80px;
-        position: relative; /* Add this */
-        z-index: 1; /* Add this */
+        position: relative;
+        z-index: 1;
+        height: calc(
+            100vh - 80px
+        ); /* Viewport height minus control banner height */
+        overflow-y: auto;
+        scroll-behavior: smooth; /* For smooth scrolling */
     }
 
     .control-banner {
@@ -183,5 +188,10 @@
     .icon {
         width: 20px;
         height: 20px;
+    }
+
+    :global(.at-cursor-beat) {
+        background: rgba(64, 64, 255, 0.75);
+        width: 3px;
     }
 </style>
