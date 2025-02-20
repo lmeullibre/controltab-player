@@ -21,18 +21,15 @@
                         enablePlayer: true,
                         soundFont:
                             "https://cdn.jsdelivr.net/npm/@coderline/alphatab@latest/dist/soundfont/sonivox.sf2",
-                        scrollElement: containerElement,
                     },
                 };
                 player = new AlphaTabApi(containerElement, settings);
 
-                // Add player state change listener
                 player.playerStateChanged.on((e) => {
                     isPlaying =
                         e.state === window.alphaTab.synth.PlayerState.Playing;
                 });
 
-                // Add player ready listener
                 player.playerReady.on(() => {
                     console.log("Player is ready!");
                 });
@@ -137,12 +134,6 @@
 </div>
 
 <style>
-    .tab-content {
-        padding-bottom: 80px;
-        position: relative;
-        z-index: 1;
-    }
-
     .control-banner {
         position: fixed;
         bottom: 0;
@@ -151,7 +142,7 @@
         background: white;
         border-top: 1px solid #e5e5e5;
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-        z-index: 9999; /* Add this high z-index */
+        z-index: 9999;
     }
 
     .control-container {
