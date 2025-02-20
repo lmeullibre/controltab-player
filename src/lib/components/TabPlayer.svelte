@@ -15,6 +15,7 @@
 
             try {
                 const settings = new (window as any).alphaTab.Settings();
+                settings.notation.bracketBar = false;
 
                 player = new AlphaTabApi(containerElement, settings);
 
