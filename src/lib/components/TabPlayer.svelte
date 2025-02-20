@@ -141,11 +141,6 @@
         padding-bottom: 80px;
         position: relative;
         z-index: 1;
-        height: calc(
-            100vh - 80px
-        ); /* Viewport height minus control banner height */
-        overflow-y: auto;
-        scroll-behavior: smooth; /* For smooth scrolling */
     }
 
     .control-banner {
