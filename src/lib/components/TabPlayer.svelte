@@ -4,19 +4,19 @@
         autoPlay?: boolean;
     }>();
 
-    let player: any | null = null;
+    let player: AlphaTabApi | null = null;
     let containerElement: HTMLElement;
 
     $effect(() => {
-        console.log("Full window.alphaTab:", (window as any).alphaTab);
-
-        if (typeof window !== "undefined" && (window as any).alphaTab) {
-            const { AlphaTabApi } = (window as any).alphaTab;
+        if (typeof window !== "undefined" && window.alphaTab) {
+            const { AlphaTabApi } = window.alphaTab;
 
             try {
-                const settings = new (window as any).alphaTab.Settings();
-                settings.notation.bracketBar = false;
-
+                const settings: AlphaTabSettings = {
+                    notation: {
+                        elements: new Map([["guitarTuning", false]]),
+                    },
+                };
                 player = new AlphaTabApi(containerElement, settings);
 
                 if (src) {
