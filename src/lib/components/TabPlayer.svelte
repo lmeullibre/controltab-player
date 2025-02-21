@@ -4,11 +4,28 @@
         autoPlay?: boolean;
     }>();
 
+    interface Track {
+        index: number;
+        name: string;
+        shortName?: string;
+        color?: {
+            raw: number;
+            rgba: string;
+        };
+        defaultSystemLayout?: number;
+        systemLayout?: number[];
+    }
+
     let player: AlphaTabApi | null = null;
     let containerElement: HTMLElement;
-    let isPlaying = false;
+    let isPlaying = $state<boolean>(false);
+    let tracks = $state<Track[]>([]);
+    let selectedTrackIndex = $state<number | null>(null);
+    let currentScore: any = null;
 
     $effect(() => {
+        if (!containerElement) return;
+
         if (typeof window !== "undefined" && window.alphaTab) {
             const { AlphaTabApi } = window.alphaTab;
 
@@ -25,31 +42,42 @@
                 };
                 player = new AlphaTabApi(containerElement, settings);
 
-                player.playerStateChanged.on((e) => {
-                    isPlaying =
-                        e.state === window.alphaTab.synth.PlayerState.Playing;
-                });
+                player.scoreLoaded.on((score) => {
+                    console.log("Score loaded:", score);
+                    currentScore = score;
 
-                player.playerReady.on(() => {
-                    console.log("Player is ready!");
+                    const newTracks = Array.from(score.tracks).map(
+                        (track: any) => ({
+                            index: track.index as number,
+                            name:
+                                track.name ||
+                                track.shortName ||
+                                `Track ${track.index + 1}`,
+                        }),
+                    );
+
+                    // Assign to tracks to trigger reactivity
+                    tracks = newTracks;
+                    console.log("Tracks array updated:", tracks);
+
+                    // Select first track by default
+                    if (tracks.length > 0) {
+                        selectTrack(0);
+                    }
                 });
 
                 if (src) {
                     loadTab(src);
                 }
+
+                return () => {
+                    if (player) {
+                        player.destroy();
+                    }
+                };
             } catch (error) {
                 console.error("Error initializing AlphaTab:", error);
             }
-
-            return () => {
-                if (player) {
-                    player.destroy();
-                }
-            };
-        } else {
-            console.error(
-                "AlphaTab is not loaded. Please include the AlphaTab script and CSS in your HTML.",
-            );
         }
     });
 
@@ -71,24 +99,20 @@
         }
     }
 
+    function selectTrack(index: number) {
+        selectedTrackIndex = index;
+        if (player && currentScore) {
+            const track = currentScore.tracks[index];
+            if (track) {
+                player.renderTracks([track]);
+            }
+        }
+    }
+
     function togglePlay() {
         if (player) {
             player.playPause();
             isPlaying = !isPlaying;
-        }
-    }
-
-    function play() {
-        if (player) {
-            player.play();
-            isPlaying = true;
-        }
-    }
-
-    function pause() {
-        if (player) {
-            player.pause();
-            isPlaying = false;
         }
     }
 </script>
@@ -99,7 +123,7 @@
 
 <div class="control-banner">
     <div class="control-container">
-        <button class="play-button" on:click={togglePlay}>
+        <button class="play-button" onclick={togglePlay}>
             {#if isPlaying}
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -130,6 +154,21 @@
                 <span>Play</span>
             {/if}
         </button>
+
+        <!-- Track Selector -->
+        <select
+            class="track-selector"
+            value={selectedTrackIndex}
+            onchange={(e) => selectTrack(parseInt(e.currentTarget.value))}
+        >
+            {#each tracks as track, i (track.index)}
+                <option value={i}>
+                    {track.name}
+                </option>
+            {/each}
+        </select>
+
+        <span>Tracks: {tracks.length}</span>
     </div>
 </div>
 
@@ -150,7 +189,7 @@
         margin: 0 auto;
         padding: 12px 16px;
         display: flex;
-        justify-content: center;
+        gap: 16px;
         align-items: center;
     }
 
@@ -169,6 +208,23 @@
 
     .play-button:hover {
         background-color: #2563eb;
+    }
+
+    .track-selector {
+        padding: 8px 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background-color: white;
+        color: #4b5563;
+        font-size: 14px;
+        cursor: pointer;
+        min-width: 200px;
+    }
+
+    .track-selector:focus {
+        outline: none;
+        border-color: #3b82f6;
+        ring: 2px solid rgba(59, 130, 246, 0.5);
     }
 
     .icon {
